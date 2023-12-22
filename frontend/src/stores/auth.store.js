@@ -15,19 +15,25 @@ export const useAuthStore = defineStore({
   }),
   actions: {
     async login(username, password) {
-      const user = await AuthDataService.login({
+      await AuthDataService.login({
         username,
         password,
-      });
+      })
+        .then((user) => {
+          this.status = user.data;
+          setTimeout(() => {
+            // update pinia state
+            this.user = user.data;
 
-      // update pinia state
-      this.user = user.data;
+            // store user details and jwt in local storage to keep user logged in between page refreshes
+            localStorage.setItem("user", JSON.stringify(user.data));
 
-      // store user details and jwt in local storage to keep user logged in between page refreshes
-      localStorage.setItem("user", JSON.stringify(user.data));
-
-      // redirect to previous url or default to home page
-      router.push(this.returnUrl || "/");
+            router.push(this.returnUrl || "/");
+          }, 2000);
+        })
+        .catch((error) => {
+          this.status = error.response.data;
+        });
     },
     async signup(username, email, password) {
       await AuthDataService.signup({

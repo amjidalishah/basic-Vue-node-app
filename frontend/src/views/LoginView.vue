@@ -2,15 +2,18 @@
 import { Form, Field } from "vee-validate";
 import * as Yup from "yup";
 
+import { computed } from "vue";
+
 import { useAuthStore } from "@/stores";
 
 const schema = Yup.object().shape({
   username: Yup.string().required("Username is required"),
   password: Yup.string().required("Password is required"),
 });
+const authStore = useAuthStore();
+const status = computed(() => authStore.status);
 
 function onSubmit(values, { setErrors }) {
-  const authStore = useAuthStore();
   const { username, password } = values;
 
   return authStore
@@ -33,6 +36,10 @@ function onSubmit(values, { setErrors }) {
           >
             Sign in to your account
           </h1>
+
+          <span v-if="status?.message" class="text-xl mt-3">
+            {{ status?.message }}</span
+          >
 
           <Form
             class="space-y-4 md:space-y-6"
